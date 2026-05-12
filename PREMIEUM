@@ -142,55 +142,78 @@ end
 -- =========================
 -- TP ALL MERCHANTS
 -- =========================
+local RunService = game:GetService("RunService")
 
 local function tpAllMerchantsWithPackage()
     Rayfield:Notify({ Title = "Quest", Content = "Visiting all Merchants...", Duration = 2 })
+
     local waited = 0
     while waited < 5 do
         if equipPackage() then break end
         task.wait(0.5)
         waited += 0.5
     end
-    if not equipPackage() then
-        Rayfield:Notify({ Title = "Quest", Content = "Package tool not found", Duration = 3 })
-    end
+
     local MerchantList = {
-        workspace.Merchants.AffinityMerchant, workspace.Merchants.BankerMerchant,
-        workspace.Merchants.BetterDrinkMerchant, workspace.Merchants.Boat1Merchant,
-        workspace.Merchants.Boat2Merchant, workspace.Merchants.Boat3Merchant,
-        workspace.Merchants.Boat4Merchant, workspace.Merchants.Boat5Merchant,
-        workspace.Merchants.CoinMerchant, workspace.Merchants.DrinkMerchant,
-        workspace.Merchants.EmoteMerchant, workspace.Merchants.ExpertiseMerchant,
-        workspace.Merchants.FishMerchant, workspace.Merchants.FlailMerchant,
-        workspace.Merchants.FriendMerchant, workspace.Merchants.KrizmaMerch,
-        workspace.Merchants.Progression2Merchant, workspace.Merchants.Progression3Merchant,
-        workspace.Merchants.Progression4Merchant, workspace.Merchants.Progression5Merchant,
-        workspace.Merchants.ProgressionMerchant, workspace.Merchants.QuestFishMerchant,
-        workspace.Merchants.QuestMerchant, workspace.Merchants.QuestMerchant2,
-        workspace.Merchants.SniperMerchant, workspace.Merchants.SwordMerchant,
+        workspace.Merchants.AffinityMerchant,
+        workspace.Merchants.BankerMerchant,
+        workspace.Merchants.BetterDrinkMerchant,
+        workspace.Merchants.Boat1Merchant,
+        workspace.Merchants.Boat2Merchant,
+        workspace.Merchants.Boat3Merchant,
+        workspace.Merchants.Boat4Merchant,
+        workspace.Merchants.Boat5Merchant,
+        workspace.Merchants.CoinMerchant,
+        workspace.Merchants.DrinkMerchant,
+        workspace.Merchants.EmoteMerchant,
+        workspace.Merchants.ExpertiseMerchant,
+        workspace.Merchants.FishMerchant,
+        workspace.Merchants.FlailMerchant,
+        workspace.Merchants.FriendMerchant,
+        workspace.Merchants.KrizmaMerch,
+        workspace.Merchants.Progression2Merchant,
+        workspace.Merchants.Progression3Merchant,
+        workspace.Merchants.Progression4Merchant,
+        workspace.Merchants.Progression5Merchant,
+        workspace.Merchants.ProgressionMerchant,
+        workspace.Merchants.QuestFishMerchant,
+        workspace.Merchants.QuestMerchant,
+        workspace.Merchants.QuestMerchant2,
+        workspace.Merchants.SniperMerchant,
+        workspace.Merchants.SwordMerchant,
     }
+
     for i, NPC in ipairs(MerchantList) do
-        if not rootPart then break end
-        local hrp = NPC:FindFirstChild("HumanoidRootPart")
-        if hrp then
-            rootPart.CFrame = hrp.CFrame
-            task.wait(0.1)
-            equipPackage()
-            for _, obj in pairs(NPC:GetDescendants()) do
-                if obj:IsA("ClickDetector") then
-                    pcall(function()
-                        mouse1press()
-                        fireclickdetector(obj)
-                        task.wait(0.2)
-                        mouse1release()
-                    end)
-                    break
-                end
+        if not rootPart or not NPC then continue end
+
+        local follow
+        follow = RunService.Heartbeat:Connect(function()
+            if NPC and NPC.Parent and rootPart then
+                pcall(function()
+                    NPC:PivotTo(rootPart.CFrame * CFrame.new(0, 0, -4))
+                end)
+            else
+                if follow then follow:Disconnect() end
             end
-            Rayfield:Notify({ Title = i .. "/" .. #MerchantList, Content = NPC.Name, Duration = 0.8 })
-            task.wait(0.1)
+        end)
+
+        task.wait(0.2)
+        equipPackage()
+
+        for _, obj in pairs(NPC:GetDescendants()) do
+            if obj:IsA("ClickDetector") then
+                obj.MaxActivationDistance = 999
+                pcall(function() fireclickdetector(obj) end)
+                break
+            end
         end
+
+        Rayfield:Notify({ Title = i .. "/" .. #MerchantList, Content = NPC.Name, Duration = 0.5 })
+        task.wait(0.8)
+
+        if follow then follow:Disconnect() end
     end
+
     Rayfield:Notify({ Title = "Quest", Content = "All Merchants visited!", Duration = 3 })
 end
 
