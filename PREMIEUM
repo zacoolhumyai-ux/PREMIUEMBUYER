@@ -26,6 +26,15 @@ local WhiteList = {
     ["THECAM_T1"] = true,
     ["AmilyW46H2"] = true,
     ["Nopetree3"] = true,
+    ["LasthopeXu"] = true,
+    ["StringXU"] = true,
+    ["bond2b"] = true,
+    ["RIP_LKOD"] = true,
+    ["RIP_LKOD"] = true,
+
+
+
+
 }
 
 if not WhiteList[player.Name] then
