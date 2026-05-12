@@ -4,15 +4,7 @@ local Players = game:GetService("Players")
 local VirtualUser = game:GetService("VirtualUser")
 local player = Players.LocalPlayer
 
--- =========================
--- KEY SYSTEM
--- =========================
-
 local CorrectKey = "zz"
-
--- =========================
--- WHITE LIST
--- =========================
 
 local WhiteList = {
     ["kootyueuri"] = true,
@@ -42,9 +34,6 @@ if not WhiteList[player.Name] then
     return
 end
 
--- =========================
--- WINDOW
--- =========================
 
 local Window = Rayfield:CreateWindow({
    Name = "NERD HUB",
@@ -78,10 +67,6 @@ local Window = Rayfield:CreateWindow({
    }
 })
 
--- =========================
--- CHARACTER
--- =========================
-
 local character
 local rootPart
 
@@ -91,10 +76,6 @@ local function updateCharacter()
 end
 
 updateCharacter()
-
--- =========================
--- SETTINGS
--- =========================
 
 local autoFruit = false
 local tpDelay = 1
