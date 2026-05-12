@@ -188,9 +188,12 @@ local function tpAllMerchantsWithPackage()
 
         local follow
         follow = RunService.Heartbeat:Connect(function()
-            if NPC and NPC.Parent and rootPart then
+            if NPC and NPC.Parent and character then
                 pcall(function()
-                    NPC:PivotTo(rootPart.CFrame * CFrame.new(0, 0, -4))
+                    local hrp = character:FindFirstChild("HumanoidRootPart")
+                    if hrp then
+                        NPC:PivotTo(hrp.CFrame * CFrame.new(0, 0, -4))
+                    end
                 end)
             else
                 if follow then follow:Disconnect() end
@@ -216,7 +219,6 @@ local function tpAllMerchantsWithPackage()
 
     Rayfield:Notify({ Title = "Quest", Content = "All Merchants visited!", Duration = 3 })
 end
-
 -- =========================
 -- SELL FRUIT
 -- =========================
