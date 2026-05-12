@@ -1,0 +1,1425 @@
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+
+local Players = game:GetService("Players")
+local VirtualUser = game:GetService("VirtualUser")
+local player = Players.LocalPlayer
+
+-- =========================
+-- KEY SYSTEM
+-- =========================
+
+local CorrectKey = "zz"
+
+-- =========================
+-- WHITE LIST
+-- =========================
+
+local WhiteList = {
+    ["kootyueuri"] = true,
+    ["Moletamit9920"] = true,
+    ["SandBoxPXQHDeo"] = true,
+    ["Miles_Oli4"] = true,
+    ["EEZmodx1412"] = true,
+    ["Pioussalan9578"] = true,
+    ["THEGODJIKUNG"] = true,
+    ["Romkomtong1"] = true,
+    ["THECAM_T1"] = true,
+    ["AmilyW46H2"] = true,
+    ["Nopetree3"] = true,
+}
+
+if not WhiteList[player.Name] then
+    player:Kick("JOKING ?")
+    return
+end
+
+-- =========================
+-- WINDOW
+-- =========================
+
+local Window = Rayfield:CreateWindow({
+   Name = "NERD HUB",
+   Icon = 0,
+   LoadingTitle = "OPA v0.5",
+   LoadingSubtitle = "By Nerd",
+   ShowText = "Helper",
+   Theme = "Default",
+   ToggleUIKeybind = "K",
+   DisableRayfieldPrompts = false,
+   DisableBuildWarnings = false,
+   ConfigurationSaving = {
+      Enabled = false,
+      FolderName = nil,
+      FileName = "NERD"
+   },
+   Discord = {
+      Enabled = false,
+      Invite = "",
+      RememberJoins = false
+   },
+   KeySystem = true,
+   KeySettings = {
+      Title = "NERD HUB KEY",
+      Subtitle = "Key System",
+      Note = "INPUT KEY?",
+      FileName = "NerdKey",
+      SaveKey = true,
+      GrabKeyFromSite = false,
+      Key = {CorrectKey}
+   }
+})
+
+-- =========================
+-- CHARACTER
+-- =========================
+
+local character
+local rootPart
+
+local function updateCharacter()
+    character = player.Character or player.CharacterAdded:Wait()
+    rootPart = character:WaitForChild("HumanoidRootPart")
+end
+
+updateCharacter()
+
+-- =========================
+-- SETTINGS
+-- =========================
+
+local autoFruit = false
+local tpDelay = 1
+local antiAFK = false
+local autoFarm = false
+local farmConnection = nil
+local grabtoolsFunc = nil
+local savedCFrame = nil
+local selectedPlayer = nil
+local autoRespawnTP = false
+local autoTeleportBack = false
+local autoCooldownQuest = false
+local questLoopRunning = false
+
+-- =========================
+-- MERCHANT LIST
+-- =========================
+
+local MerchantNames = {
+    "AffinityMerchant","BankerMerchant","BetterDrinkMerchant",
+    "Boat1Merchant","Boat2Merchant","Boat3Merchant","Boat4Merchant","Boat5Merchant",
+    "CoinMerchant","DrinkMerchant","EmoteMerchant","ExpertiseMerchant",
+    "FishMerchant","FlailMerchant","FriendMerchant","KrizmaMerch",
+    "Progression2Merchant","Progression3Merchant","Progression4Merchant",
+    "Progression5Merchant","ProgressionMerchant","QuestFishMerchant",
+    "QuestMerchant","QuestMerchant2","SniperMerchant","SwordMerchant",
+}
+
+-- =========================
+-- TP TO MERCHANT
+-- =========================
+
+local function tpToMerchant(name)
+    if not name then return false end
+    local NPC = workspace.Merchants:FindFirstChild(name)
+    if not NPC then return false end
+    local hrp = NPC:FindFirstChild("HumanoidRootPart")
+    if hrp and rootPart then
+        rootPart.CFrame = hrp.CFrame + Vector3.new(3, 0, 0)
+        return true
+    end
+    return false
+end
+
+-- =========================
+-- EQUIP PACKAGE
+-- =========================
+
+local function equipPackage()
+    local backpack = player:FindFirstChild("Backpack")
+    local tool = (backpack and backpack:FindFirstChild("Package"))
+               or (character and character:FindFirstChild("Package"))
+    if tool and character then
+        local humanoid = character:FindFirstChildWhichIsA("Humanoid")
+        if humanoid then
+            humanoid:EquipTool(tool)
+            return true
+        end
+    end
+    return false
+end
+
+-- =========================
+-- TP ALL MERCHANTS
+-- =========================
+
+local function tpAllMerchantsWithPackage()
+    Rayfield:Notify({ Title = "Quest", Content = "Visiting all Merchants...", Duration = 2 })
+    local waited = 0
+    while waited < 5 do
+        if equipPackage() then break end
+        task.wait(0.5)
+        waited += 0.5
+    end
+    if not equipPackage() then
+        Rayfield:Notify({ Title = "Quest", Content = "Package tool not found", Duration = 3 })
+    end
+    local MerchantList = {
+        workspace.Merchants.AffinityMerchant, workspace.Merchants.BankerMerchant,
+        workspace.Merchants.BetterDrinkMerchant, workspace.Merchants.Boat1Merchant,
+        workspace.Merchants.Boat2Merchant, workspace.Merchants.Boat3Merchant,
+        workspace.Merchants.Boat4Merchant, workspace.Merchants.Boat5Merchant,
+        workspace.Merchants.CoinMerchant, workspace.Merchants.DrinkMerchant,
+        workspace.Merchants.EmoteMerchant, workspace.Merchants.ExpertiseMerchant,
+        workspace.Merchants.FishMerchant, workspace.Merchants.FlailMerchant,
+        workspace.Merchants.FriendMerchant, workspace.Merchants.KrizmaMerch,
+        workspace.Merchants.Progression2Merchant, workspace.Merchants.Progression3Merchant,
+        workspace.Merchants.Progression4Merchant, workspace.Merchants.Progression5Merchant,
+        workspace.Merchants.ProgressionMerchant, workspace.Merchants.QuestFishMerchant,
+        workspace.Merchants.QuestMerchant, workspace.Merchants.QuestMerchant2,
+        workspace.Merchants.SniperMerchant, workspace.Merchants.SwordMerchant,
+    }
+    for i, NPC in ipairs(MerchantList) do
+        if not rootPart then break end
+        local hrp = NPC:FindFirstChild("HumanoidRootPart")
+        if hrp then
+            rootPart.CFrame = hrp.CFrame
+            task.wait(0.1)
+            equipPackage()
+            for _, obj in pairs(NPC:GetDescendants()) do
+                if obj:IsA("ClickDetector") then
+                    pcall(function()
+                        mouse1press()
+                        fireclickdetector(obj)
+                        task.wait(0.2)
+                        mouse1release()
+                    end)
+                    break
+                end
+            end
+            Rayfield:Notify({ Title = i .. "/" .. #MerchantList, Content = NPC.Name, Duration = 0.8 })
+            task.wait(0.1)
+        end
+    end
+    Rayfield:Notify({ Title = "Quest", Content = "All Merchants visited!", Duration = 3 })
+end
+
+-- =========================
+-- SELL FRUIT
+-- =========================
+
+local function sellFruitAtCoinMerchant()
+    local NPC = workspace.Merchants:FindFirstChild("CoinMerchant")
+    if not NPC then Rayfield:Notify({ Title = "Sell Fruit", Content = "CoinMerchant not found", Duration = 2 }) return end
+    local hrp = NPC:FindFirstChild("HumanoidRootPart")
+    if hrp and rootPart then rootPart.CFrame = hrp.CFrame + Vector3.new(3, 0, 0) task.wait(0.5) end
+    local Clickable = NPC:FindFirstChild("Clickable")
+    if not Clickable then Rayfield:Notify({ Title = "Sell Fruit", Content = "Clickable not found", Duration = 2 }) return end
+    local ClickDetector = Clickable:FindFirstChildWhichIsA("ClickDetector")
+    if ClickDetector then pcall(function() fireclickdetector(ClickDetector) end) task.wait(0.5) end
+    local DFCoinShop = Clickable:FindFirstChild("DFCoinShop")
+    if not DFCoinShop then Rayfield:Notify({ Title = "Sell Fruit", Content = "DFCoinShop not found", Duration = 2 }) return end
+    local SellBtn = DFCoinShop:FindFirstChild("Sell")
+    if SellBtn then
+        pcall(function() SellBtn:Activate() end)
+        Rayfield:Notify({ Title = "Sell Fruit", Content = "Fruit sold successfully!", Duration = 2 })
+    else
+        Rayfield:Notify({ Title = "Sell Fruit", Content = "Sell button not found", Duration = 2 })
+    end
+end
+
+-- =========================
+-- FRUIT SYSTEM
+-- =========================
+
+local function grabFruit(fruit)
+    for _, obj in pairs(fruit:GetDescendants()) do
+        if obj:IsA("ClickDetector") then pcall(function() fireclickdetector(obj) end) end
+    end
+end
+
+local function tpAndGrabAllFruits()
+    if not rootPart then return end
+    for _, fruit in pairs(workspace:GetChildren()) do
+        if string.find(fruit.Name, "Fruit") then
+            local targetPart = fruit:FindFirstChild("Handle") or fruit:FindFirstChildWhichIsA("BasePart")
+            if targetPart then
+                rootPart.CFrame = targetPart.CFrame + Vector3.new(0, 3, 0)
+                task.wait(0.3)
+                grabFruit(fruit)
+                Rayfield:Notify({ Title = "Fruit", Content = "Grabbed " .. fruit.Name, Duration = 2 })
+                task.wait(0.5)
+            end
+        end
+    end
+end
+
+-- =========================
+-- GRAB TOOLS
+-- =========================
+
+local function enableGrabTools()
+    local humanoid = character:FindFirstChildWhichIsA("Humanoid")
+    for _, child in ipairs(workspace:GetChildren()) do
+        if child:IsA("BackpackItem") and child:FindFirstChild("Handle") then humanoid:EquipTool(child) end
+    end
+    if grabtoolsFunc then grabtoolsFunc:Disconnect() end
+    grabtoolsFunc = workspace.ChildAdded:Connect(function(child)
+        if child:IsA("BackpackItem") and child:FindFirstChild("Handle") then
+            humanoid:EquipTool(child)
+            Rayfield:Notify({ Title = "GrabTools", Content = "Grabbed " .. child.Name, Duration = 2 })
+        end
+    end)
+end
+
+local function disableGrabTools()
+    if grabtoolsFunc then grabtoolsFunc:Disconnect() grabtoolsFunc = nil end
+end
+
+-- =========================
+-- AUTO FARM SYSTEM
+-- =========================
+
+local function doFarm()
+    for _, obj in pairs(workspace:GetDescendants()) do
+        if obj:IsA("ClickDetector") then pcall(function() fireclickdetector(obj) end) end
+    end
+end
+
+local function startAutoFarm()
+    if farmConnection then return end
+    farmConnection = task.spawn(function()
+        while autoFarm do pcall(doFarm) task.wait(tpDelay) end
+    end)
+end
+
+local function stopAutoFarm()
+    autoFarm = false
+    farmConnection = nil
+end
+
+-- =========================
+-- QUEST SYSTEM
+-- =========================
+
+local function getCooldown()
+    local ok, result = pcall(function()
+        local BillboardGui = workspace.Merchants.QuestFishMerchant.Clickable:FindFirstChild("BillboardGui")
+        if not BillboardGui then return 0 end
+        local TextLabel = BillboardGui:FindFirstChild("TextLabel")
+        if not TextLabel then return 0 end
+        return tonumber(TextLabel.Text) or 0
+    end)
+    return ok and result or 0
+end
+
+local function autoAcceptQuest()
+    local ok, err = pcall(function()
+        local NPC = workspace.Merchants:FindFirstChild("QuestFishMerchant")
+        if not NPC then error("NPC not found") end
+        local hrp = NPC:FindFirstChild("HumanoidRootPart")
+        if hrp and rootPart then rootPart.CFrame = hrp.CFrame task.wait(0.3) end
+        local cd = getCooldown()
+        if cd and cd > 0 then Rayfield:Notify({ Title = "Quest", Content = "Cooldown: " .. cd .. "s remaining", Duration = 3 }) return end
+        local Retum = NPC.Clickable:FindFirstChild("Retum")
+        if not Retum then error("Retum not found") end
+        Retum:FireServer("Package")
+        task.wait(0.1)
+        Retum:FireServer("Close")
+        Rayfield:Notify({ Title = "Quest", Content = "Quest accepted!", Duration = 2 })
+        task.wait(1)
+        tpAllMerchantsWithPackage()
+    end)
+    if not ok then Rayfield:Notify({ Title = "Quest Error", Content = tostring(err), Duration = 3 }) end
+end
+
+-- =========================
+-- AUTO LOOP
+-- =========================
+
+task.spawn(function()
+    while task.wait(tpDelay) do
+        if autoFruit then pcall(tpAndGrabAllFruits) end
+        if autoTeleportBack and savedCFrame and rootPart then rootPart.CFrame = savedCFrame end
+    end
+end)
+
+-- =========================
+-- ANTI AFK
+-- =========================
+
+player.Idled:Connect(function()
+    if antiAFK then
+        VirtualUser:CaptureController()
+        VirtualUser:ClickButton2(Vector2.new())
+        Rayfield:Notify({ Title = "Anti AFK", Content = "AFK Prevented", Duration = 2 })
+    end
+end)
+
+-- =========================
+-- PLAYER LIST
+-- =========================
+
+local function getPlayerList()
+    local list = {}
+    for _, p in ipairs(Players:GetPlayers()) do
+        if p ~= player then table.insert(list, p.Name) end
+    end
+    return list
+end
+
+-- =========================
+-- AUTO RESPAWN TP
+-- =========================
+
+player.CharacterAdded:Connect(function(char)
+    character = char
+    rootPart = character:WaitForChild("HumanoidRootPart")
+    if autoRespawnTP and savedCFrame then
+        task.wait(1)
+        rootPart.CFrame = savedCFrame
+        Rayfield:Notify({ Title = "Spawn Point", Content = "Returned to saved position", Duration = 2 })
+    end
+end)
+
+-- =========================
+-- AUTO HAKI SYSTEM
+-- =========================
+
+local VirtualInputManager = game:GetService("VirtualInputManager")
+local autoHaki = false
+local hakiHolding = false
+local HOLD_KEY = Enum.KeyCode.R
+local TOGGLE_HAKI_KEY = Enum.KeyCode.Q
+
+local function KeyDown(key) VirtualInputManager:SendKeyEvent(true, key, false, game) end
+local function KeyUp(key) VirtualInputManager:SendKeyEvent(false, key, false, game) end
+local function PressKey(key) KeyDown(key) task.wait(0.05) KeyUp(key) end
+
+local function GetHakiPercent()
+    pcall(function() return workspace.UserData["User_" .. player.UserId].Data.Haki.Value end)
+    return workspace.UserData["User_" .. player.UserId].Data.Haki.Value
+end
+
+task.spawn(function()
+    while task.wait(0.2) do
+        if autoHaki then
+            local haki = GetHakiPercent()
+            if haki <= 0 then
+                if hakiHolding then hakiHolding = false KeyUp(HOLD_KEY) end
+                Rayfield:Notify({ Title = "Auto Haki", Content = "Haki empty, waiting...", Duration = 2 })
+                repeat task.wait(1) haki = GetHakiPercent() until haki >= 100 or not autoHaki
+                if autoHaki then
+                    PressKey(TOGGLE_HAKI_KEY) task.wait(0.5)
+                    hakiHolding = true KeyDown(HOLD_KEY)
+                    Rayfield:Notify({ Title = "Auto Haki", Content = "Haki full, resumed!", Duration = 2 })
+                end
+            else
+                if not hakiHolding then hakiHolding = true KeyDown(HOLD_KEY) end
+            end
+        else
+            if hakiHolding then hakiHolding = false KeyUp(HOLD_KEY) end
+        end
+    end
+end)
+
+-- =========================
+-- AUTO FISH SYSTEM
+-- =========================
+
+local autoFish = false
+local fishConnection = nil
+local effectLoop = nil
+
+local function getRod()
+    local char = player.Character
+    if not char then return nil end
+    for _, tool in pairs(char:GetChildren()) do
+        if tool:IsA("Tool") and string.find(tool.Name, "Rod") then return tool end
+    end
+    for _, tool in pairs(player.Backpack:GetChildren()) do
+        if tool:IsA("Tool") and string.find(tool.Name, "Rod") then return tool end
+    end
+    return nil
+end
+
+local function castRod(t)
+    if t:FindFirstChild("Click") then
+        t.Click:FireServer(player:GetMouse().Hit.p)
+    end
+end
+
+local function stopEffectLoop()
+    if effectLoop then effectLoop = false end
+end
+
+local function startAutoFish()
+    task.spawn(function()
+        while autoFish do
+            local rod = getRod()
+            if not rod then task.wait(0.5) continue end
+
+            if player.Backpack:FindFirstChild(rod.Name) then
+                local humanoid = character and character:FindFirstChildWhichIsA("Humanoid")
+                if humanoid then humanoid:EquipTool(rod) task.wait(1) end
+            end
+
+            rod = player.Character and player.Character:FindFirstChild(rod.Name)
+            if not rod then task.wait(0.5) continue end
+
+            repeat task.wait(0.05) until rod:FindFirstChild("Click")
+            repeat task.wait(0.05) until rod:FindFirstChild("Caught")
+
+            castRod(rod)
+            Rayfield:Notify({ Title = "Auto Fish", Content = "Line cast!", Duration = 1 })
+
+            local timeout = 0
+            repeat
+                task.wait(0.1)
+                timeout += 0.1
+                if not autoFish then break end
+                local cast = rod:FindFirstChild("Cast")
+                if cast then
+                    local bobber = cast:FindFirstChild("Bobber")
+                    if bobber then
+                        local effect = bobber:FindFirstChild("Effect")
+                        if effect and effect.Enabled == true then
+                            mouse1click()
+                            Rayfield:Notify({ Title = "Auto Fish", Content = "Fish caught!", Duration = 1 })
+                            task.wait(0.8)
+                            break
+                        end
+                    end
+                end
+            until timeout > 30 or not autoFish
+
+            task.wait(0.3)
+        end
+
+        stopEffectLoop()
+        if fishConnection then fishConnection:Disconnect() fishConnection = nil end
+    end)
+end
+
+-- =========================
+-- AUTO COOK FISH SYSTEM
+-- =========================
+
+local autoCook = false
+local fishToolNames = {"Small", "Medium", "Large"}
+
+local function isFishTool(name)
+    if string.find(name, "Cooked") then return false end
+    for _, keyword in pairs(fishToolNames) do
+        if string.find(name, keyword) then return true end
+    end
+    return false
+end
+
+local function getAllFishFromBackpack()
+    local tools = {}
+    for _, tool in pairs(player.Backpack:GetChildren()) do
+        if tool:IsA("Tool") and isFishTool(tool.Name) then
+            table.insert(tools, tool.Name)
+        end
+    end
+    return tools
+end
+
+local function cookAllFishInInventory()
+    local fishObj = workspace:GetChildren()[37]
+    if not fishObj then
+        Rayfield:Notify({ Title = "Auto Cook", Content = "Cook object not found", Duration = 2 })
+        return
+    end
+
+    local targetPart = fishObj:FindFirstChildWhichIsA("BasePart")
+    if targetPart and rootPart then
+        rootPart.CFrame = CFrame.new(targetPart.Position + Vector3.new(2, 0, 0))
+        task.wait(0.5)
+    end
+
+    local toolNames = getAllFishFromBackpack()
+    if #toolNames == 0 then
+        Rayfield:Notify({ Title = "Auto Cook", Content = "No raw fish in backpack", Duration = 2 })
+        return
+    end
+
+    Rayfield:Notify({ Title = "Auto Cook", Content = "Found " .. #toolNames .. " fish, cooking...", Duration = 2 })
+
+    local cooked = 0
+    local humanoid = character and character:FindFirstChildWhichIsA("Humanoid")
+    if not humanoid then return end
+
+    for _, toolName in pairs(toolNames) do
+        local tool = player.Backpack:FindFirstChild(toolName)
+        if not tool then continue end
+
+        humanoid:UnequipTools()
+        task.wait(0.2)
+        humanoid:EquipTool(tool)
+        task.wait(0.5)
+
+        pcall(function() mouse1click() end)
+        task.wait(0.1)
+
+        for _, desc in pairs(fishObj:GetDescendants()) do
+            if desc:IsA("ClickDetector") then
+                pcall(function()
+                    desc.MaxActivationDistance = 50
+                    fireclickdetector(desc)
+                end)
+                task.wait(0.1)
+                break
+            end
+        end
+
+        cooked += 1
+        Rayfield:Notify({ Title = "Auto Cook", Content = toolName .. " cooked! (" .. cooked .. "/" .. #toolNames .. ")", Duration = 1 })
+        task.wait(0.5)
+    end
+
+    humanoid:UnequipTools()
+    Rayfield:Notify({ Title = "Auto Cook", Content = "Done! Cooked " .. cooked .. " fish", Duration = 3 })
+end
+
+local function startAutoCook()
+    task.spawn(function()
+        while autoCook do
+            pcall(cookAllFishInInventory)
+            task.wait(2)
+            if #getAllFishFromBackpack() == 0 then
+                autoCook = false
+                Rayfield:Notify({ Title = "Auto Cook", Content = "All fish cooked, stopped", Duration = 3 })
+            end
+        end
+    end)
+end
+
+-- =========================
+-- AUTO SELL FISH SYSTEM
+-- =========================
+
+local autoSellFish = false
+
+local function sellFishAtMerchant()
+    local NPC = workspace.Merchants:FindFirstChild("FishMerchant")
+    if not NPC then
+        Rayfield:Notify({ Title = "Sell Fish", Content = "FishMerchant not found", Duration = 2 })
+        return
+    end
+
+    local hrp = NPC:FindFirstChild("HumanoidRootPart")
+    if hrp and rootPart then
+        rootPart.CFrame = hrp.CFrame + Vector3.new(3, 0, 0)
+        task.wait(0.5)
+    end
+
+    local Clickable = NPC:FindFirstChild("Clickable")
+    if not Clickable then
+        Rayfield:Notify({ Title = "Sell Fish", Content = "Clickable not found", Duration = 2 })
+        return
+    end
+
+    local cd = Clickable:FindFirstChild("ClickDetector")
+    if cd then pcall(function() fireclickdetector(cd) end) task.wait(0.5) end
+
+    local ChefGUI = Clickable:FindFirstChild("ChefGUI")
+    if not ChefGUI then
+        Rayfield:Notify({ Title = "Sell Fish", Content = "ChefGUI not found", Duration = 2 })
+        return
+    end
+
+    local ChatProgress = ChefGUI:FindFirstChild("ChatProgress")
+    local Clicked = ChefGUI:FindFirstChild("Clicked")
+
+    if ChatProgress and ChatProgress.Value ~= 0 then
+        ChatProgress.Value = 0
+        task.wait(0.2)
+    end
+
+    local AcceptBtn = ChefGUI:FindFirstChild("Frame")
+        and ChefGUI.Frame:FindFirstChild("Frame")
+        and ChefGUI.Frame.Frame:FindFirstChild("ImageButton")
+        and ChefGUI.Frame.Frame.ImageButton:FindFirstChild("Accept")
+
+    if AcceptBtn then
+        pcall(function() AcceptBtn:Activate() end)
+        task.wait(0.5)
+    end
+
+    if Clicked then
+        local Retum = Clicked:FindFirstChild("Retum")
+        if Retum then
+            pcall(function() Retum:FireServer("Sell") end)
+            task.wait(0.2)
+            pcall(function() Retum:FireServer("Close") end)
+            Rayfield:Notify({ Title = "Sell Fish", Content = "All fish sold!", Duration = 2 })
+        else
+            Rayfield:Notify({ Title = "Sell Fish", Content = "Retum not found", Duration = 2 })
+        end
+    end
+
+    if ChatProgress then ChatProgress.Value = 0 end
+end
+
+local function startAutoSellFish()
+    task.spawn(function()
+        while autoSellFish do
+            pcall(sellFishAtMerchant)
+            task.wait(5)
+        end
+    end)
+end
+
+-- =========================
+-- AUTO LOOT BARREL SYSTEM
+-- =========================
+
+local autoBarrel = false
+local barrelCooldown = 10
+
+local function lootAllBarrels()
+    local Barrels = workspace:FindFirstChild("Barrels")
+    if not Barrels then
+        Rayfield:Notify({ Title = "Barrel", Content = "Barrels folder not found", Duration = 2 })
+        return
+    end
+
+    local BarrelFolder = Barrels:FindFirstChild("Barrels")
+    if not BarrelFolder then
+        Rayfield:Notify({ Title = "Barrel", Content = "Barrel subfolder not found", Duration = 2 })
+        return
+    end
+
+    local barrels = BarrelFolder:GetChildren()
+    local count = 0
+
+    for _, barrel in pairs(barrels) do
+        if not rootPart then break end
+        local basePart = barrel:FindFirstChildWhichIsA("BasePart")
+        if basePart then
+            rootPart.CFrame = CFrame.new(basePart.Position + Vector3.new(0, 2, 0))
+            task.wait(0.2)
+            for _, desc in pairs(barrel:GetDescendants()) do
+                if desc:IsA("ClickDetector") then
+                    pcall(function()
+                        desc.MaxActivationDistance = 50
+                        fireclickdetector(desc)
+                    end)
+                    task.wait(0.1)
+                    break
+                end
+            end
+            count += 1
+        end
+    end
+
+    Rayfield:Notify({ Title = "Barrel", Content = "Looted " .. count .. " barrels!", Duration = 2 })
+end
+
+local function startAutoBarrel()
+    task.spawn(function()
+        while autoBarrel do
+            pcall(lootAllBarrels)
+            task.wait(barrelCooldown)
+        end
+    end)
+end
+
+-- =========================
+-- ANTI MOD
+-- =========================
+
+local AntiMod = false
+local ModList = { "1actualslim","SuperLordTrent","DoN_LLuKu","iikervin","P_w9r","ok7","vHEROv","Quiet_Reaper","YatoGodzs" }
+
+local function isMod(p)
+    for _, name in ipairs(ModList) do if p.Name == name then return true end end
+    return false
+end
+
+Players.PlayerAdded:Connect(function(p)
+    if AntiMod and isMod(p) then Rayfield:Notify({ Title = "Anti Mod", Content = "Mod joined: " .. p.Name, Duration = 3 }) end
+end)
+
+-- =========================
+-- BRING MOB SYSTEM
+-- =========================
+
+local bringMobEnabled = false
+local BRING_DISTANCE = 8
+local BRING_OFFSET = 3
+local BRING_INTERVAL = 0.1
+local selectedMobs = {}
+
+local function isMobSelected(mobName)
+    if #selectedMobs == 0 then return true end
+    for _, name in ipairs(selectedMobs) do
+        if name == mobName then return true end
+    end
+    return false
+end
+
+local function getMobList()
+    local char = game.Players.LocalPlayer.Character
+    local names = {}
+    local seen = {}
+    local playerChars = {}
+    for _, plr in ipairs(game.Players:GetPlayers()) do
+        if plr.Character then playerChars[plr.Character] = true end
+    end
+    -- สแกนจาก workspace.Enemies ก่อน (ถ้ามี)
+    pcall(function()
+        for _, folder in pairs(workspace.Enemies:GetChildren()) do
+            local function scanModel(model)
+                if model:IsA("Model") and not playerChars[model] and model ~= char then
+                    local hrp = model:FindFirstChild("HumanoidRootPart")
+                    local hum = model:FindFirstChildOfClass("Humanoid")
+                    if hrp and hum and hum.Health > 0 and not seen[model.Name] then
+                        seen[model.Name] = true
+                        table.insert(names, model.Name)
+                    end
+                end
+            end
+            scanModel(folder)
+            for _, mob in pairs(folder:GetDescendants()) do
+                if mob:IsA("Model") then scanModel(mob) end
+            end
+        end
+    end)
+    -- fallback: สแกน workspace ทั้งหมด
+    if #names == 0 then
+        for _, obj in ipairs(workspace:GetDescendants()) do
+            if obj:IsA("Model") and obj ~= char and not playerChars[obj] then
+                local hrp = obj:FindFirstChild("HumanoidRootPart")
+                local hum = obj:FindFirstChildOfClass("Humanoid")
+                if hrp and hum and hum.Health > 0 and not seen[obj.Name] then
+                    seen[obj.Name] = true
+                    table.insert(names, obj.Name)
+                end
+            end
+        end
+    end
+    table.sort(names)
+    return names
+end
+
+local function bringMobs()
+    local char = game.Players.LocalPlayer.Character
+    if not char then return end
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+    local cf = hrp.CFrame
+    local index = 0
+    local playerChars = {}
+    for _, plr in ipairs(game.Players:GetPlayers()) do
+        if plr.Character then playerChars[plr.Character] = true end
+    end
+
+    -- ลอง workspace.Enemies ก่อน
+    local function tryBring(obj)
+        if obj:IsA("Model") and obj ~= char and not playerChars[obj] then
+            local mobHRP = obj:FindFirstChild("HumanoidRootPart")
+            local hum = obj:FindFirstChildOfClass("Humanoid")
+            if mobHRP and hum and hum.Health > 0 and isMobSelected(obj.Name) then
+                local offsetX = (index % 2 == 0 and 1 or -1) * (math.floor(index / 2) * BRING_OFFSET)
+                pcall(function()
+                    obj:PivotTo(cf + cf.LookVector * BRING_DISTANCE + cf.RightVector * offsetX)
+                end)
+                index += 1
+                if index % 5 == 0 then task.wait() end
+            end
+        end
+    end
+
+    local usedEnemies = false
+    pcall(function()
+        for _, folder in pairs(workspace.Enemies:GetChildren()) do
+            tryBring(folder)
+            for _, mob in pairs(folder:GetDescendants()) do tryBring(mob) end
+        end
+        usedEnemies = true
+    end)
+
+    if not usedEnemies or index == 0 then
+        for _, obj in ipairs(workspace:GetDescendants()) do tryBring(obj) end
+    end
+end
+
+-- =========================
+-- UI TABS
+-- =========================
+
+local FruitTab    = Window:CreateTab("Fruit",      4483362458)
+local AFKTab      = Window:CreateTab("AFK",        4483362458)
+local TeleportTab = Window:CreateTab("Teleport",   4483362458)
+local AutoFarmTab = Window:CreateTab("Auto Farm",  4483362458)
+local AntiModTab  = Window:CreateTab("Anti Mod",   4483362458)
+local HakiTab     = Window:CreateTab("Haki",       4483362458)
+local FishTab     = Window:CreateTab("Fish",       4483362458)
+local MobTab      = Window:CreateTab("Bring Mob",  4483362458)
+
+-- =========================
+-- FRUIT TAB
+-- =========================
+
+FruitTab:CreateToggle({ Name = "Auto TP + Grab Fruits", CurrentValue = false, Callback = function(v) autoFruit = v end })
+FruitTab:CreateToggle({ Name = "Take Devil Fruit", CurrentValue = false, Callback = function(v) if v then enableGrabTools() else disableGrabTools() end end })
+FruitTab:CreateSlider({ Name = "Delay", Range = {0.1, 5}, Increment = 0.1, CurrentValue = 1, Callback = function(v) tpDelay = v end })
+FruitTab:CreateButton({ Name = "TP + Grab All Fruits", Callback = function() tpAndGrabAllFruits() end })
+FruitTab:CreateButton({ Name = "Grab Existing Tools", Callback = function() enableGrabTools() end })
+FruitTab:CreateButton({ Name = "Sell Fruit (CoinMerchant)", Callback = function() pcall(sellFruitAtCoinMerchant) end })
+
+-- =========================
+-- AFK TAB
+-- =========================
+
+AFKTab:CreateToggle({ Name = "Enable Anti AFK", CurrentValue = false, Callback = function(v)
+    antiAFK = v
+    Rayfield:Notify({ Title = "Anti AFK", Content = v and "Anti AFK ON" or "Anti AFK OFF", Duration = 2 })
+end })
+
+-- =========================
+-- TELEPORT TAB
+-- =========================
+
+TeleportTab:CreateDropdown({ Name = "Select Player", Options = getPlayerList(), CurrentOption = {"None"}, MultipleOptions = false, Callback = function(opt)
+    selectedPlayer = opt[1]
+    Rayfield:Notify({ Title = "Teleport", Content = "Selected: " .. selectedPlayer, Duration = 2 })
+end })
+TeleportTab:CreateButton({ Name = "Set Spawn Point", Callback = function()
+    if rootPart then savedCFrame = rootPart.CFrame Rayfield:Notify({ Title = "Spawn Point", Content = "Position saved", Duration = 2 }) end
+end })
+TeleportTab:CreateToggle({ Name = "Auto TP On Respawn", CurrentValue = false, Callback = function(v)
+    autoRespawnTP = v
+    Rayfield:Notify({ Title = "Spawn Point", Content = v and "Auto Respawn TP ON" or "Auto Respawn TP OFF", Duration = 2 })
+end })
+TeleportTab:CreateToggle({ Name = "Auto Teleport Back", CurrentValue = false, Callback = function(v)
+    autoTeleportBack = v
+    Rayfield:Notify({ Title = "Teleport", Content = v and "Auto TP Back ON" or "Auto TP Back OFF", Duration = 2 })
+end })
+TeleportTab:CreateButton({ Name = "Teleport To Selected Player", Callback = function()
+    if not selectedPlayer then Rayfield:Notify({ Title = "Teleport", Content = "Select a player first", Duration = 2 }) return end
+    local target = Players:FindFirstChild(selectedPlayer)
+    if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+        rootPart.CFrame = target.Character.HumanoidRootPart.CFrame + Vector3.new(3, 0, 0)
+        Rayfield:Notify({ Title = "Teleport", Content = "Teleported to " .. target.Name, Duration = 2 })
+    end
+end })
+TeleportTab:CreateDropdown({ Name = "TP to Merchant", Options = MerchantNames, CurrentOption = {MerchantNames[1]}, MultipleOptions = false, Callback = function(opt)
+    tpToMerchant(opt[1])
+end })
+
+-- =========================
+-- AUTO FARM TAB
+-- =========================
+
+AutoFarmTab:CreateSection("Auto Farm")
+
+AutoFarmTab:CreateToggle({ Name = "Enable Auto Farm", CurrentValue = false, Callback = function(v)
+    autoFarm = v
+    if v then startAutoFarm() Rayfield:Notify({ Title = "Auto Farm", Content = "Auto Farm ON", Duration = 2 })
+    else stopAutoFarm() Rayfield:Notify({ Title = "Auto Farm", Content = "Auto Farm OFF", Duration = 2 }) end
+end })
+AutoFarmTab:CreateToggle({ Name = "Auto Farm + TP Fruits", CurrentValue = false, Callback = function(v)
+    autoFruit = v
+    Rayfield:Notify({ Title = "Auto Farm", Content = v and "Auto Fruit ON" or "Auto Fruit OFF", Duration = 2 })
+end })
+AutoFarmTab:CreateSlider({ Name = "Farm Delay (seconds)", Range = {0.1, 5}, Increment = 0.1, CurrentValue = 1, Callback = function(v) tpDelay = v end })
+AutoFarmTab:CreateButton({ Name = "Farm Once", Callback = function()
+    pcall(doFarm)
+    Rayfield:Notify({ Title = "Auto Farm", Content = "Farm done!", Duration = 2 })
+end })
+
+AutoFarmTab:CreateSection("Quest")
+
+AutoFarmTab:CreateToggle({ Name = "Auto Quest", CurrentValue = false, Callback = function(v)
+    autoCooldownQuest = v
+    if v and not questLoopRunning then
+        questLoopRunning = true
+        task.spawn(function()
+            while autoCooldownQuest do
+                local cd = getCooldown()
+                if cd and cd > 0 then
+                    local waited = 0
+                    while autoCooldownQuest and waited < cd + 0.5 do task.wait(1) waited += 1 end
+                else
+                    pcall(autoAcceptQuest)
+                    local waited = 0
+                    local totalWait = #MerchantNames * 0.3 + 5
+                    while autoCooldownQuest and waited < totalWait do task.wait(1) waited += 1 end
+                end
+            end
+            questLoopRunning = false
+        end)
+        Rayfield:Notify({ Title = "Auto Quest", Content = "Auto Quest ON", Duration = 2 })
+    elseif not v then
+        Rayfield:Notify({ Title = "Auto Quest", Content = "Auto Quest OFF", Duration = 2 })
+    end
+end })
+AutoFarmTab:CreateButton({ Name = "Accept Quest Once", Callback = function() pcall(autoAcceptQuest) end })
+AutoFarmTab:CreateButton({ Name = "Visit All Merchants (with Package)", Callback = function() task.spawn(tpAllMerchantsWithPackage) end })
+
+AutoFarmTab:CreateSection("Barrel")
+
+AutoFarmTab:CreateToggle({ Name = "Auto Loot Barrels", CurrentValue = false, Callback = function(v)
+    autoBarrel = v
+    if v then
+        startAutoBarrel()
+        Rayfield:Notify({ Title = "Barrel", Content = "Auto Loot Barrel ON", Duration = 2 })
+    else
+        Rayfield:Notify({ Title = "Barrel", Content = "Auto Loot Barrel OFF", Duration = 2 })
+    end
+end })
+AutoFarmTab:CreateButton({ Name = "Loot All Barrels Once", Callback = function()
+    task.spawn(function() pcall(lootAllBarrels) end)
+end })
+AutoFarmTab:CreateSlider({ Name = "Barrel Cooldown (seconds)", Range = {5, 60}, Increment = 1, CurrentValue = 10, Callback = function(v)
+    barrelCooldown = v
+    Rayfield:Notify({ Title = "Barrel", Content = "Cooldown set: " .. v .. "s", Duration = 1 })
+end })
+
+AutoFarmTab:CreateSection("Special Quest")
+
+local autoSpecialQuest = false
+local specialQuestLoopRunning = false
+
+local function getSpecialQuestCooldown()
+    local ok, result = pcall(function()
+        local BillboardGui = workspace.Merchants.QuestHakiMerchant.Clickable:FindFirstChild("BillboardGui")
+        if not BillboardGui then return 0 end
+        local TextLabel = BillboardGui:FindFirstChild("TextLabel")
+        if not TextLabel then return 0 end
+        return tonumber(TextLabel.Text) or 0
+    end)
+    return ok and result or 0
+end
+
+local function autoAcceptSpecialQuest()
+    local ok, err = pcall(function()
+        local NPC = workspace.Merchants:FindFirstChild("QuestHakiMerchant")
+        if not NPC then error("QuestHakiMerchant not found") end
+        local hrp = NPC:FindFirstChild("HumanoidRootPart")
+        if hrp and rootPart then
+            rootPart.CFrame = hrp.CFrame + Vector3.new(3, 0, 0)
+            task.wait(0.3)
+        end
+        local cd = getSpecialQuestCooldown()
+        if cd and cd > 0 then
+            Rayfield:Notify({ Title = "Special Quest", Content = "Cooldown: " .. cd .. "s remaining", Duration = 3 })
+            return
+        end
+        local backpack = player:FindFirstChild("Backpack")
+        local specialPkg = (backpack and backpack:FindFirstChild("Special Package"))
+                        or (character and character:FindFirstChild("Special Package"))
+        if not specialPkg then
+            Rayfield:Notify({ Title = "Special Quest", Content = "Special Package not found", Duration = 3 })
+            return
+        end
+        local humanoid = character and character:FindFirstChildWhichIsA("Humanoid")
+        if humanoid then humanoid:EquipTool(specialPkg) task.wait(0.5) end
+        local Clickable = NPC:FindFirstChild("Clickable")
+        if not Clickable then error("Clickable not found") end
+        local Retum = Clickable:FindFirstChild("Retum")
+        if not Retum then error("Retum not found") end
+        Retum:FireServer("Special Package")
+        task.wait(0.1)
+        Retum:FireServer("Close")
+        Rayfield:Notify({ Title = "Special Quest", Content = "Special Quest accepted!", Duration = 2 })
+        task.wait(1)
+        tpAllMerchantsWithPackage()
+    end)
+    if not ok then Rayfield:Notify({ Title = "Special Quest Error", Content = tostring(err), Duration = 3 }) end
+end
+
+AutoFarmTab:CreateToggle({ Name = "Auto Special Quest", CurrentValue = false, Callback = function(v)
+    autoSpecialQuest = v
+    if v and not specialQuestLoopRunning then
+        specialQuestLoopRunning = true
+        task.spawn(function()
+            while autoSpecialQuest do
+                local cd = getSpecialQuestCooldown()
+                if cd and cd > 0 then
+                    Rayfield:Notify({ Title = "Special Quest", Content = "Waiting cooldown: " .. cd .. "s", Duration = 3 })
+                    local waited = 0
+                    while autoSpecialQuest and waited < cd + 0.5 do task.wait(1) waited += 1 end
+                else
+                    pcall(autoAcceptSpecialQuest)
+                    local waited = 0
+                    local totalWait = #MerchantNames * 0.3 + 5
+                    while autoSpecialQuest and waited < totalWait do task.wait(1) waited += 1 end
+                end
+            end
+            specialQuestLoopRunning = false
+        end)
+        Rayfield:Notify({ Title = "Special Quest", Content = "Auto Special Quest ON", Duration = 2 })
+    elseif not v then
+        Rayfield:Notify({ Title = "Special Quest", Content = "Auto Special Quest OFF", Duration = 2 })
+    end
+end })
+AutoFarmTab:CreateButton({ Name = "Accept Special Quest Once", Callback = function()
+    task.spawn(function() pcall(autoAcceptSpecialQuest) end)
+end })
+
+-- =========================
+-- ANTI MOD TAB
+-- =========================
+
+AntiModTab:CreateToggle({ Name = "Anti Mod", CurrentValue = false, Callback = function(value)
+    AntiMod = value
+    if AntiMod then
+        Rayfield:Notify({ Title = "Anti Mod", Content = "Anti Mod ON", Duration = 2 })
+        for _, p in ipairs(Players:GetPlayers()) do
+            if isMod(p) then Rayfield:Notify({ Title = "Anti Mod", Content = "Mod detected: " .. p.Name, Duration = 3 }) end
+        end
+    else
+        Rayfield:Notify({ Title = "Anti Mod", Content = "Anti Mod OFF", Duration = 2 })
+    end
+end })
+
+-- =========================
+-- HAKI TAB
+-- =========================
+
+HakiTab:CreateToggle({ Name = "Auto Haki + Hold R", CurrentValue = false, Callback = function(v)
+    autoHaki = v
+    if v then
+        PressKey(TOGGLE_HAKI_KEY) task.wait(0.5)
+        hakiHolding = true KeyDown(HOLD_KEY)
+        Rayfield:Notify({ Title = "Auto Haki", Content = "Auto Haki ON", Duration = 2 })
+    else
+        hakiHolding = false KeyUp(HOLD_KEY)
+        Rayfield:Notify({ Title = "Auto Haki", Content = "Auto Haki OFF", Duration = 2 })
+    end
+end })
+
+-- =========================
+-- FISH TAB
+-- =========================
+
+FishTab:CreateSection("Fish")
+
+FishTab:CreateToggle({ Name = "Auto Fish", CurrentValue = false, Callback = function(v)
+    autoFish = v
+    if v then
+        task.spawn(startAutoFish)
+        Rayfield:Notify({ Title = "Auto Fish", Content = "Auto Fish ON", Duration = 2 })
+    else
+        stopEffectLoop()
+        if fishConnection then fishConnection:Disconnect() fishConnection = nil end
+        Rayfield:Notify({ Title = "Auto Fish", Content = "Auto Fish OFF", Duration = 2 })
+    end
+end })
+
+FishTab:CreateSection("Cook Fish")
+
+FishTab:CreateToggle({ Name = "Auto Cook Fish", CurrentValue = false, Callback = function(v)
+    autoCook = v
+    if v then
+        startAutoCook()
+        Rayfield:Notify({ Title = "Auto Cook", Content = "Auto Cook ON", Duration = 2 })
+    else
+        Rayfield:Notify({ Title = "Auto Cook", Content = "Auto Cook OFF", Duration = 2 })
+    end
+end })
+FishTab:CreateButton({ Name = "Cook All Fish Once", Callback = function()
+    task.spawn(function() pcall(cookAllFishInInventory) end)
+end })
+
+FishTab:CreateSection("Sell Fish")
+
+FishTab:CreateToggle({ Name = "Auto Sell Fish", CurrentValue = false, Callback = function(v)
+    autoSellFish = v
+    if v then
+        startAutoSellFish()
+        Rayfield:Notify({ Title = "Sell Fish", Content = "Auto Sell Fish ON", Duration = 2 })
+    else
+        Rayfield:Notify({ Title = "Sell Fish", Content = "Auto Sell Fish OFF", Duration = 2 })
+    end
+end })
+FishTab:CreateButton({ Name = "Sell Fish Once", Callback = function()
+    task.spawn(function() pcall(sellFishAtMerchant) end)
+end })
+
+-- =========================
+-- BRING MOB TAB
+-- =========================
+
+MobTab:CreateSection("Select Mob")
+
+local mobDropdown = MobTab:CreateDropdown({
+    Name = "Select Mob",
+    Options = getMobList(),
+    CurrentOption = {},
+    MultipleOptions = true,
+    Callback = function(selected)
+        selectedMobs = selected
+        if #selected == 0 then
+            Rayfield:Notify({ Title = "Select Mob", Content = "None selected — pulling all", Duration = 2 })
+        else
+            Rayfield:Notify({ Title = "Select Mob", Content = #selected .. " type(s) selected", Duration = 2 })
+        end
+    end
+})
+
+MobTab:CreateButton({
+    Name = "Refresh Mob List",
+    Callback = function()
+        local newList = getMobList()
+        mobDropdown:Refresh(newList, true)
+        selectedMobs = {}
+        Rayfield:Notify({ Title = "Refresh", Content = "Found " .. #newList .. " mob type(s)", Duration = 2 })
+    end
+})
+
+MobTab:CreateSection("Controls")
+
+MobTab:CreateToggle({
+    Name = "Bring Mob",
+    CurrentValue = false,
+    Callback = function(v)
+        bringMobEnabled = v
+        if v then
+            task.spawn(function()
+                while bringMobEnabled do
+                    pcall(bringMobs)
+                    task.wait(BRING_INTERVAL)
+                end
+            end)
+            Rayfield:Notify({ Title = "Bring Mob", Content = "ON", Duration = 2 })
+        else
+            Rayfield:Notify({ Title = "Bring Mob", Content = "OFF", Duration = 2 })
+        end
+    end
+})
+
+MobTab:CreateButton({
+    Name = "Bring Once",
+    Callback = function()
+        task.spawn(function()
+            pcall(bringMobs)
+            Rayfield:Notify({ Title = "Bring Mob", Content = "Done!", Duration = 2 })
+        end)
+    end
+})
+
+MobTab:CreateSection("Settings")
+
+MobTab:CreateSlider({
+    Name = "Pull Distance (studs)",
+    Range = {2, 20}, Increment = 1, CurrentValue = 8,
+    Callback = function(v) BRING_DISTANCE = v end
+})
+MobTab:CreateSlider({
+    Name = "Spread Range",
+    Range = {1, 10}, Increment = 1, CurrentValue = 3,
+    Callback = function(v) BRING_OFFSET = v end
+})
+MobTab:CreateSlider({
+    Name = "Pull Speed (low = less lag)",
+    Range = {1, 10}, Increment = 1, CurrentValue = 5,
+    Callback = function(v) BRING_INTERVAL = 0.25 - (v * 0.02) end
+})
+-- =========================
+-- AUTO HAKI SYSTEM
+-- =========================
+
+local VirtualInputManager = game:GetService("VirtualInputManager")
+local TeleportService = game:GetService("TeleportService")
+local autoHaki = false
+local hakiHolding = false
+local HOLD_KEY = Enum.KeyCode.R
+local TOGGLE_HAKI_KEY = Enum.KeyCode.Q
+
+local function KeyDown(key) VirtualInputManager:SendKeyEvent(true, key, false, game) end
+local function KeyUp(key) VirtualInputManager:SendKeyEvent(false, key, false, game) end
+local function PressKey(key) KeyDown(key) task.wait(0.05) KeyUp(key) end
+
+local function GetHakiPercent()
+    local userData = workspace.UserData:FindFirstChild("User_" .. player.UserId)
+    if not userData then return 100 end
+    local hakiBar = userData:FindFirstChild("HakiBar")
+    if not hakiBar then return 100 end
+    local server = hakiBar:FindFirstChild("HakiBarServer")
+    if not server then return 100 end
+    return server.Value
+end
+
+local hopping = false
+
+local function HopServer()
+    if hopping then return end
+    hopping = true
+    pcall(function() writefile("nerd_autohaki.txt", "true") end)
+    Rayfield:Notify({ Title = "Auto Haki", Content = "Haki 0% — Hopping Server...", Duration = 2 })
+    task.wait(1.5)
+    pcall(function() TeleportService:Teleport(game.PlaceId, player) end)
+end
+
+local function CheckAutoHakiResume()
+    local ok, content = pcall(function() return readfile("nerd_autohaki.txt") end)
+    if ok and content == "true" then
+        pcall(function() writefile("nerd_autohaki.txt", "true") end)
+
+        Rayfield:Notify({ Title = "Auto Haki", Content = "Clicking Spawn...", Duration = 2 })
+
+        -- คลิก Load (Spawn) เรื่อยๆ จนกว่า character จะโหลด
+        task.spawn(function()
+            local clicked = false
+            while not clicked do
+                task.wait(0.5)
+                pcall(function()
+                    local playerGui = player:WaitForChild("PlayerGui")
+                    local Load = playerGui:FindFirstChild("Load")
+                    if Load then
+                        local Frame = Load:FindFirstChild("Frame")
+                        if Frame then
+                            local LoadBtn = Frame:FindFirstChild("Load")
+                            if LoadBtn then
+                                LoadBtn:Activate()
+                                pcall(function() LoadBtn.MouseButton1Click:Fire() end)
+                            end
+                        end
+                    end
+                end)
+                -- หยุดกดเมื่อ character โหลดแล้ว
+                if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                    clicked = true
+                    Rayfield:Notify({ Title = "Auto Haki", Content = "Spawned!", Duration = 2 })
+                end
+            end
+        end)
+
+        task.wait(5)
+        autoHaki = true
+        PressKey(TOGGLE_HAKI_KEY)
+        task.wait(0.5)
+        hakiHolding = true
+        KeyDown(HOLD_KEY)
+        Rayfield:Notify({ Title = "Auto Haki", Content = "Auto resumed after hop!", Duration = 3 })
+    end
+end
+
+task.spawn(function()
+    task.wait(3)
+    CheckAutoHakiResume()
+end)
+
+task.spawn(function()
+    while task.wait(0.2) do
+        if autoHaki then
+            local ok, haki = pcall(GetHakiPercent)
+            if not ok then haki = 100 end
+            if haki <= 0 then
+                if hakiHolding then
+                    hakiHolding = false
+                    KeyUp(HOLD_KEY)
+                end
+                HopServer()
+            else
+                hopping = false
+                if not hakiHolding then
+                    hakiHolding = true
+                    KeyDown(HOLD_KEY)
+                end
+            end
+        else
+            if hakiHolding then
+                hakiHolding = false
+                KeyUp(HOLD_KEY)
+            end
+        end
+    end
+end)
+-- =========================
+-- HAKI TAB
+-- =========================
+
+HakiTab:CreateToggle({ Name = "Auto Haki + Hold R (Hop if 0%)", CurrentValue = false, Callback = function(v)
+    autoHaki = v
+    if v then
+        PressKey(TOGGLE_HAKI_KEY)
+        task.wait(0.5)
+        hakiHolding = true
+        KeyDown(HOLD_KEY)
+        Rayfield:Notify({ Title = "Auto Haki", Content = "Auto Haki ON — Will hop if 0%", Duration = 2 })
+    else
+        hakiHolding = false
+        KeyUp(HOLD_KEY)
+        Rayfield:Notify({ Title = "Auto Haki", Content = "Auto Haki OFF", Duration = 2 })
+    end
+end })
+
+-- =========================
+-- AUTO SPAWN WHEN DEAD
+-- =========================
+
+local autoSpawnDead = false
+
+local function clickSpawnBtn()
+    pcall(function()
+        local LoadBtn = player.PlayerGui.Load.Frame.Load
+        LoadBtn:Activate()
+        pcall(function() LoadBtn.MouseButton1Click:Fire() end)
+    end)
+end
+
+local function isSpawnScreenVisible()
+    local ok, result = pcall(function()
+        local LoadBtn = player.PlayerGui.Load.Frame.Load
+        return LoadBtn and LoadBtn.Visible
+    end)
+    return ok and result
+end
+
+local function startAutoSpawnDead()
+    task.spawn(function()
+        while autoSpawnDead do
+            task.wait(0.5)
+            pcall(function()
+                local char = player.Character
+                local isDead = false
+
+                -- เช็ค Humanoid health
+                if not char then
+                    isDead = true
+                else
+                    local humanoid = char:FindFirstChildOfClass("Humanoid")
+                    if humanoid and humanoid.Health <= 0 then
+                        isDead = true
+                    end
+                end
+
+                -- เช็คจาก UpdateHaki.Nope (ถ้าตายจะมี flag)
+                if not isDead then
+                    pcall(function()
+                        local userData = workspace.UserData:FindFirstChild("User_" .. player.UserId)
+                        if userData then
+                            local nope = userData.UpdateHaki:FindFirstChild("Nope")
+                            if nope and nope.Disabled then
+                                isDead = true
+                            end
+                        end
+                    end)
+                end
+
+                if isDead then
+                    -- กดซ้ำเรื่อยๆ จนกว่า spawn screen จะหาย
+                    clickSpawnBtn()
+                end
+            end)
+        end
+    end)
+end 
+
+HakiTab:CreateSection("Auto Spawn")
+
+HakiTab:CreateToggle({ Name = "Auto Spawn When Dead", CurrentValue = false, Callback = function(v)
+    autoSpawnDead = v
+    if v then
+        startAutoSpawnDead()
+        Rayfield:Notify({ Title = "Auto Spawn", Content = "Auto Spawn ON", Duration = 2 })
+    else
+        Rayfield:Notify({ Title = "Auto Spawn", Content = "Auto Spawn OFF", Duration = 2 })
+    end
+end })
