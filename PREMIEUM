@@ -1907,3 +1907,128 @@ ToolsTab:CreateButton({
         Rayfield:Notify({ Title = "Inventory", Content = "ลบ " .. count .. " Tools ออกแล้ว", Duration = 3 })
     end
 })
+
+-- =========================
+-- AUTO KEYBOARD TAB
+-- =========================
+
+local KeyboardTab = Window:CreateTab("Auto Key", 4483362458)
+
+local autoKeyEnabled = false
+local selectedKeys = {}
+local keyPressDelay = 0.2
+local keyHoldDuration = 0.05
+
+local keyMap = {
+    ["Z"] = Enum.KeyCode.Z,
+    ["X"] = Enum.KeyCode.X,
+    ["C"] = Enum.KeyCode.C,
+    ["V"] = Enum.KeyCode.V,
+    ["B"] = Enum.KeyCode.B,
+    ["N"] = Enum.KeyCode.N,
+    ["F"] = Enum.KeyCode.F,
+    ["G"] = Enum.KeyCode.G,
+    ["H"] = Enum.KeyCode.H,
+    ["J"] = Enum.KeyCode.J,
+    ["K"] = Enum.KeyCode.K,
+    ["L"] = Enum.KeyCode.L,
+}
+
+local function pressSelectedKeys()
+    for _, keyName in ipairs(selectedKeys) do
+        local keyCode = keyMap[keyName]
+        if keyCode then
+            VirtualInputManager:SendKeyEvent(true, keyCode, false, game)
+            task.wait(keyHoldDuration)
+            VirtualInputManager:SendKeyEvent(false, keyCode, false, game)
+            task.wait(keyPressDelay)
+        end
+    end
+end
+
+local function startAutoKeyboard()
+    task.spawn(function()
+        while autoKeyEnabled do
+            if #selectedKeys > 0 then
+                pcall(pressSelectedKeys)
+            end
+            task.wait(0.05)
+        end
+    end)
+end
+
+KeyboardTab:CreateSection("เลือกคีย์ที่ต้องการกด")
+
+KeyboardTab:CreateDropdown({
+    Name = "Select Keys",
+    Options = {"Z","X","C","V","B","N","F","G","H","J","K","L"},
+    CurrentOption = {},
+    MultipleOptions = true,
+    Callback = function(selected)
+        selectedKeys = selected
+        Rayfield:Notify({
+            Title = "Auto Key",
+            Content = #selected > 0
+                and "เลือก: " .. table.concat(selected, ", ")
+                or "ยังไม่ได้เลือกคีย์",
+            Duration = 2
+        })
+    end
+})
+
+KeyboardTab:CreateSection("ตั้งค่า")
+
+KeyboardTab:CreateSlider({
+    Name = "Delay ระหว่างคีย์ (วินาที)",
+    Range = {0.05, 2},
+    Increment = 0.05,
+    CurrentValue = 0.2,
+    Callback = function(v)
+        keyPressDelay = v
+        Rayfield:Notify({ Title = "Auto Key", Content = "Delay: " .. v .. "s", Duration = 1 })
+    end
+})
+
+KeyboardTab:CreateSlider({
+    Name = "Hold Duration (วินาที)",
+    Range = {0.02, 1},
+    Increment = 0.02,
+    CurrentValue = 0.05,
+    Callback = function(v)
+        keyHoldDuration = v
+        Rayfield:Notify({ Title = "Auto Key", Content = "Hold: " .. v .. "s", Duration = 1 })
+    end
+})
+
+KeyboardTab:CreateSection("เปิด/ปิด")
+
+KeyboardTab:CreateToggle({
+    Name = "Auto Press Keys",
+    CurrentValue = false,
+    Callback = function(v)
+        autoKeyEnabled = v
+        if v then
+            if #selectedKeys == 0 then
+                Rayfield:Notify({ Title = "Auto Key", Content = "เลือกคีย์ก่อนเปิด!", Duration = 3 })
+                autoKeyEnabled = false
+                return
+            end
+            startAutoKeyboard()
+            Rayfield:Notify({ Title = "Auto Key", Content = "ON — กำลังกด: " .. table.concat(selectedKeys, ", "), Duration = 3 })
+        else
+            Rayfield:Notify({ Title = "Auto Key", Content = "OFF", Duration = 2 })
+        end
+    end
+})
+
+KeyboardTab:CreateButton({
+    Name = "กดคีย์ที่เลือกครั้งเดียว",
+    Callback = function()
+        if #selectedKeys == 0 then
+            Rayfield:Notify({ Title = "Auto Key", Content = "เลือกคีย์ก่อน!", Duration = 2 })
+            return
+        end
+        task.spawn(function() pcall(pressSelectedKeys) end)
+        Rayfield:Notify({ Title = "Auto Key", Content = "กดแล้ว: " .. table.concat(selectedKeys, ", "), Duration = 2 })
+    end
+})
