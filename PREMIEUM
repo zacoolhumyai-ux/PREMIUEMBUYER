@@ -144,43 +144,83 @@ RunService.Stepped:Connect(function()
 end)
 
 -- =========================
--- BRING MERCHANT + CLICK (Quest version)
+-- QUEST MERCHANT LIST (Updated)
 -- =========================
 
 local QuestMerchantList = {
+    "AFK_NPC",
     "AffinityMerchant",
     "BetterDrinkMerchant",
     "Boat1Merchant","Boat2Merchant","Boat3Merchant","Boat4Merchant","Boat5Merchant",
     "DrinkMerchant","EmoteMerchant","ExpertiseMerchant",
     "FishMerchant","FlailMerchant","FriendMerchant","KrizmaMerch",
+    "LegendaryHero",
     "QuestFishMerchant","QuestMerchant","QuestMerchant2",
+    "SellerMerchant",
     "SniperMerchant","SwordMerchant",
 }
 
+-- =========================
+-- EQUIP QUEST TOOL (Package หรือ Special Package)
+-- =========================
+
+local function equipQuestTool()
+    local backpack = player:FindFirstChild("Backpack")
+    local toolNames = {"Package", "Special Package"}
+    for _, name in ipairs(toolNames) do
+        local tool = (backpack and backpack:FindFirstChild(name))
+                  or (character and character:FindFirstChild(name))
+        if tool and character then
+            local humanoid = character:FindFirstChildWhichIsA("Humanoid")
+            if humanoid then
+                humanoid:EquipTool(tool)
+                return true, name
+            end
+        end
+    end
+    return false, nil
+end
+
+-- =========================
+-- BRING & CLICK ALL MERCHANTS (Fixed TP to front of HRP)
+-- =========================
+
 local function bringAndClickAllMerchants()
-    Rayfield:Notify({ Title = "Quest", Content = "Bringing all Merchants...", Duration = 2 })
+    Rayfield:Notify({ Title = "Quest", Content = "Visiting all Merchants...", Duration = 2 })
+
+    -- พยายาม equip tool ก่อนเริ่ม
     local waited = 0
     while waited < 5 do
-        if equipPackage() then break end
+        local ok, name = equipQuestTool()
+        if ok then
+            Rayfield:Notify({ Title = "Quest", Content = "Equipped: " .. name, Duration = 1 })
+            break
+        end
         task.wait(0.5)
         waited += 0.5
     end
+
     for i, name in ipairs(QuestMerchantList) do
+        if not rootPart or not character then break end
+
         local NPC = workspace.Merchants:FindFirstChild(name)
-        if not NPC or not rootPart or not character then continue end
-        local follow
-        follow = RunService.Heartbeat:Connect(function()
-            if NPC and NPC.Parent and character then
-                pcall(function()
-                    local hrp = character:FindFirstChild("HumanoidRootPart")
-                    if hrp then NPC:PivotTo(hrp.CFrame * CFrame.new(0, 0, -4)) end
-                end)
-            else
-                if follow then follow:Disconnect() end
-            end
-        end)
+        if not NPC then
+            Rayfield:Notify({ Title = i .. "/" .. #QuestMerchantList, Content = name .. " (not found)", Duration = 0.5 })
+            continue
+        end
+
+        local hrp = NPC:FindFirstChild("HumanoidRootPart")
+        if not hrp then continue end
+
+        -- TP ไปข้างหน้า merchant (ใช้ LookVector ของ merchant HRP)
+        rootPart.CFrame = hrp.CFrame * CFrame.new(0, 0, 3)
+        task.wait(0.3)
+
+        -- equip tool ก่อน click ทุกครั้ง
+        equipQuestTool()
         task.wait(0.2)
-        equipPackage()
+
+        -- click merchant
         for _, obj in pairs(NPC:GetDescendants()) do
             if obj:IsA("ClickDetector") then
                 obj.MaxActivationDistance = 999
@@ -188,13 +228,13 @@ local function bringAndClickAllMerchants()
                 break
             end
         end
+
         Rayfield:Notify({ Title = i .. "/" .. #QuestMerchantList, Content = name, Duration = 0.5 })
         task.wait(0.8)
-        if follow then follow:Disconnect() end
     end
+
     Rayfield:Notify({ Title = "Quest", Content = "All Merchants visited!", Duration = 3 })
 end
-
 -- =========================
 -- SELL FRUIT
 -- =========================
