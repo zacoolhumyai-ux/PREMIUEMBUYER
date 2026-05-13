@@ -190,7 +190,7 @@ local function bringAndClickAllMerchants()
 
     -- พยายาม equip tool ก่อนเริ่ม
     local waited = 0
-    while waited < 5 do
+    while waited < 0.1 do
         local ok, name = equipQuestTool()
         if ok then
             Rayfield:Notify({ Title = "Quest", Content = "Equipped: " .. name, Duration = 1 })
