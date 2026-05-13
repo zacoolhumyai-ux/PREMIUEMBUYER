@@ -24,6 +24,7 @@ local WhiteList = {
     ["bond2b"] = true,
     ["RIP_LKOD"] = true,
     ["swordofringg"] = true,
+    ["erydb456"] = true,
 }
 
 if not WhiteList[player.Name] then
