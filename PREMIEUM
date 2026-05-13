@@ -2073,3 +2073,125 @@ KeyboardTab:CreateButton({
         Rayfield:Notify({ Title = "Auto Key", Content = "กดแล้ว: " .. table.concat(selectedKeys, ", "), Duration = 2 })
     end
 })
+
+-- =========================
+-- AUTO CLAIM REWARD
+-- =========================
+
+local RewardTab = Window:CreateTab("Reward", 4483362458)
+
+local autoClaimHourly = false
+local autoClaimDaily = false
+
+local function claimHourly()
+    local ok, err = pcall(function()
+        local userData = workspace:WaitForChild("UserData"):WaitForChild("User_" .. player.UserId)
+        local remote = userData:WaitForChild("ClaimRewardHourly", 3)
+        if remote then
+            remote:FireServer("RewardMark")
+            Rayfield:Notify({ Title = "Hourly Reward", Content = "Claimed!", Duration = 2 })
+        else
+            Rayfield:Notify({ Title = "Hourly Reward", Content = "Remote not found", Duration = 2 })
+        end
+    end)
+    if not ok then
+        Rayfield:Notify({ Title = "Hourly Reward Error", Content = tostring(err), Duration = 3 })
+    end
+end
+
+local function claimDaily()
+    local ok, err = pcall(function()
+        local userData = workspace:WaitForChild("UserData"):WaitForChild("User_" .. player.UserId)
+        local remote = userData:WaitForChild("ClaimRewardDaily", 3)
+        if remote then
+            remote:FireServer("RewardMark")
+            Rayfield:Notify({ Title = "Daily Reward", Content = "Claimed!", Duration = 2 })
+        else
+            Rayfield:Notify({ Title = "Daily Reward", Content = "Remote not found", Duration = 2 })
+        end
+    end)
+    if not ok then
+        Rayfield:Notify({ Title = "Daily Reward Error", Content = tostring(err), Duration = 3 })
+    end
+end
+
+-- =========================
+-- REWARD TAB UI
+-- =========================
+
+RewardTab:CreateSection("Claim Reward")
+
+RewardTab:CreateButton({
+    Name = "Claim Hourly Reward",
+    Callback = function()
+        task.spawn(claimHourly)
+    end
+})
+
+RewardTab:CreateButton({
+    Name = "Claim Daily Reward",
+    Callback = function()
+        task.spawn(claimDaily)
+    end
+})
+
+RewardTab:CreateButton({
+    Name = "Claim Both (Hourly + Daily)",
+    Callback = function()
+        task.spawn(function()
+            pcall(claimHourly)
+            task.wait(0.5)
+            pcall(claimDaily)
+        end)
+    end
+})
+
+RewardTab:CreateSection("Auto Claim")
+
+RewardTab:CreateToggle({
+    Name = "Auto Claim Hourly (ทุก 1 ชม.)",
+    CurrentValue = false,
+    Callback = function(v)
+        autoClaimHourly = v
+        if v then
+            task.spawn(function()
+                while autoClaimHourly do
+                    pcall(claimHourly)
+                    -- รอ 1 ชั่วโมง (3600 วิ)
+                    local waited = 0
+                    while autoClaimHourly and waited < 3600 do
+                        task.wait(1)
+                        waited += 1
+                    end
+                end
+            end)
+            Rayfield:Notify({ Title = "Auto Hourly", Content = "ON — จะ claim ทุก 1 ชม.", Duration = 3 })
+        else
+            Rayfield:Notify({ Title = "Auto Hourly", Content = "OFF", Duration = 2 })
+        end
+    end
+})
+
+RewardTab:CreateToggle({
+    Name = "Auto Claim Daily (ทุก 24 ชม.)",
+    CurrentValue = false,
+    Callback = function(v)
+        autoClaimDaily = v
+        if v then
+            task.spawn(function()
+                while autoClaimDaily do
+                    pcall(claimDaily)
+                    -- รอ 24 ชั่วโมง (86400 วิ)
+                    local waited = 0
+                    while autoClaimDaily and waited < 86400 do
+                        task.wait(1)
+                        waited += 1
+                    end
+                end
+            end)
+            Rayfield:Notify({ Title = "Auto Daily", Content = "ON — จะ claim ทุก 24 ชม.", Duration = 3 })
+        else
+            Rayfield:Notify({ Title = "Auto Daily", Content = "OFF", Duration = 2 })
+        end
+    end
+})
