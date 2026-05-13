@@ -223,7 +223,7 @@ local function bringAndClickAllMerchants()
         -- click merchant
         for _, obj in pairs(NPC:GetDescendants()) do
             if obj:IsA("ClickDetector") then
-                obj.MaxActivationDistance = 999
+                obj.MaxActivationDistance = 1
                 pcall(function() fireclickdetector(obj) end)
                 break
             end
