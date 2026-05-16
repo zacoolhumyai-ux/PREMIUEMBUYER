@@ -5,7 +5,17 @@ local VirtualUser = game:GetService("VirtualUser")
 local RunService = game:GetService("RunService")
 local player = Players.LocalPlayer
 
-local CorrectKey = "zz"
+local CorrectKey = "FREEKEY"
+local CorrectKey = "BUYER1"
+local CorrectKey = "VIPKEY"
+local CorrectKey = "12080932021"
+local CorrectKey = "CVNERD"
+local CorrectKey = "zer0"
+
+
+
+
+
 
 local WhiteList = {
     ["kootyueuri"] = true,
@@ -28,14 +38,14 @@ local WhiteList = {
 }
 
 if not WhiteList[player.Name] then
-    player:Kick("JOKING ?")
+    player:Kick("ซื้อสคริปต์เพื่อเข้าใช้งาน! ติดต่อ: https://discord.gg/W4Tm5CkG")
     return
 end
 
 local Window = Rayfield:CreateWindow({
    Name = "NERD HUB",
    Icon = 0,
-   LoadingTitle = "OPA v0.5",
+   LoadingTitle = "NERD_OPA_v3",
    LoadingSubtitle = "By Nerd",
    ShowText = "Helper",
    Theme = "Default",
@@ -103,7 +113,7 @@ local function tpToMerchant(name)
     if not NPC then return false end
     local hrp = NPC:FindFirstChild("HumanoidRootPart")
     if hrp and rootPart then
-        rootPart.CFrame = hrp.CFrame + Vector3.new(3, 0, 0)
+        rootPart.CFrame = hrp.CFrame + Vector3.new(2, 0, 0)
         return true
     end
     return false
@@ -419,8 +429,8 @@ end)
 -- =========================
 
 local VirtualInputManager = game:GetService("VirtualInputManager")
-local autoHaki = false
-local hakiHolding = false
+local autoHaki = true
+local hakiHolding = true
 local HOLD_KEY = Enum.KeyCode.R
 local TOGGLE_HAKI_KEY = Enum.KeyCode.Q
 
@@ -472,13 +482,13 @@ local function startAutoFish()
     task.spawn(function()
         while autoFish do
             local rod = getRod()
-            if not rod then task.wait(0.5) continue end
+            if not rod then task.wait(1.0) continue end
             if player.Backpack:FindFirstChild(rod.Name) then
                 local humanoid = character and character:FindFirstChildWhichIsA("Humanoid")
                 if humanoid then humanoid:EquipTool(rod) task.wait(1) end
             end
             rod = player.Character and player.Character:FindFirstChild(rod.Name)
-            if not rod then task.wait(0.5) continue end
+            if not rod then task.wait(1.0) continue end
             repeat task.wait(0.05) until rod:FindFirstChild("Click")
             repeat task.wait(0.05) until rod:FindFirstChild("Caught")
             castRod(rod)
@@ -496,12 +506,12 @@ local function startAutoFish()
                         if effect and effect.Enabled == true then
                             mouse1click()
                             Rayfield:Notify({ Title = "Auto Fish", Content = "Fish caught!", Duration = 1 })
-                            task.wait(0.8)
+                            task.wait(1.5)
                             break
                         end
                     end
                 end
-            until timeout > 30 or not autoFish
+            until timeout > 50 or not autoFish
             task.wait(0.3)
         end
         stopEffectLoop()
@@ -2063,7 +2073,7 @@ KeyboardTab:CreateToggle({
 })
 
 KeyboardTab:CreateButton({
-    Name = "กดคีย์ที่เลือกครั้งเดียว",
+    Name = "Press Selected Keys Once",
     Callback = function()
         if #selectedKeys == 0 then
             Rayfield:Notify({ Title = "Auto Key", Content = "เลือกคีย์ก่อน!", Duration = 2 })
@@ -2165,7 +2175,7 @@ RewardTab:CreateToggle({
                     end
                 end
             end)
-            Rayfield:Notify({ Title = "Auto Hourly", Content = "ON — จะ claim ทุก 1 ชม.", Duration = 3 })
+            Rayfield:Notify({ Title = "Auto Hourly", Content = "ON .", Duration = 3 })
         else
             Rayfield:Notify({ Title = "Auto Hourly", Content = "OFF", Duration = 2 })
         end
@@ -2189,9 +2199,59 @@ RewardTab:CreateToggle({
                     end
                 end
             end)
-            Rayfield:Notify({ Title = "Auto Daily", Content = "ON — จะ claim ทุก 24 ชม.", Duration = 3 })
+            Rayfield:Notify({ Title = "Auto Daily", Content = "ON ", Duration = 3 })
         else
             Rayfield:Notify({ Title = "Auto Daily", Content = "OFF", Duration = 2 })
         end
     end
 })
+
+RewardTab:CreateButton({
+    Name = "Stop All Auto Claim",
+    Callback = function()
+        autoClaimHourly = false
+        autoClaimDaily = false
+        Rayfield:Notify({ Title = "Auto Claim", Content = "All Auto Claim Stopped", Duration = 3 })
+    end
+})
+
+RewardTab:CreateSection("Manual Claim")
+RewardTab:CreateButton({
+    Name = "Claim Hourly Reward",
+    Callback = function()
+        task.spawn(claimHourly)
+    end
+})
+
+RewardTab:CreateToggle({
+    Name = "Auto Claim Hourly (ทุก 1 ชม.)",
+    CurrentValue = false,
+    Callback = function(v)
+        autoClaimHourly = v
+        if v then
+            task.spawn(function()
+                while autoClaimHourly do
+                    pcall(claimHourly)
+                    -- รอ 1 ชั่วโมง (3600 วิ)
+                    local waited = 0
+                    while autoClaimHourly and waited < 3600 do
+                        task.wait(1)
+                        waited += 1
+                    end
+                end
+            end)
+            Rayfield:Notify({ Title = "Auto Hourly", Content = "ON .", Duration = 3 })
+        else
+            Rayfield:Notify({ Title = "Auto Hourly", Content = "OFF", Duration = 2 })
+        end
+    end
+})
+
+
+---------------------------------
+-- END OF SCRIPT
+---------------------------------
+
+RewardTab:CreateSection("ขอบคุณที่ใช้ NERD HUB!")
+RewardTab:CreateLabel("เข้ากลุ่มเพื่อรับข่าวสารและอัปเดต: https://discord.gg/W4Tm5CkG")  -- เปลี่ยนเป็นลิงก์กลุ่มจริง
+RewardTab:CreateLabel("ติดตามผลงานอื่นๆ ได้ที่: https://www.roblox.com/users/4933062850/profile")  -- เปลี่ยนเป็นลิงก์โปรไฟล์จริง
